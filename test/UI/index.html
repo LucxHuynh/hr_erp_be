@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-Time Notifications</title>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script> <!-- Replace with your server URL -->
+</head>
+<body>
+  <h1>Real-Time Notifications</h1>
+  <ul id="notifications"></ul>
+
+  <script>
+    const socket = io('http://localhost:3000'); // Replace with your server URL
+
+    // Replace with the actual user ID
+    const userId = '1';
+
+    // Join the user's room
+    socket.emit('join', userId);
+
+    // Listen for notifications
+    socket.on('notification', (notification) => {
+      const notificationsList = document.getElementById('notifications');
+      const notificationItem = document.createElement('li');
+      notificationItem.textContent = notification.message;
+      notificationsList.appendChild(notificationItem);
+    });
+
+    // Test notification emission
+    setTimeout(() => {
+      socket.emit('notification', {
+        userId: '2',
+        type: 'TEST',
+        message: 'This is a test notification',
+        link: '#'
+      });
+    }, 5000); // Emit a test notification after 5 seconds
+  </script>
+</body>
+</html>

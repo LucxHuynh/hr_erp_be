@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/erp_hr_management
+      - PG_HOST=postgres
+      - PG_PORT=5432
+      - PG_DATABASE=erp_hr_management
+      - PG_USER=postgres
+      - PG_PASSWORD=8103
+      - JWT_SECRET=aTSJ5IERiJEl0nkoQWeQyhwcsPniE7gU
+      - JWT_EXPIRATION=1h
+      - FRONTEND_URL=http://localhost:3001
+    volumes:
+      - ./src:/usr/src/app/src
+      - /usr/src/app/node_modules
+    depends_on:
+      - mongo
+      - postgres
+    networks:
+      - app-network
+
+  frontend:
+    build: 
+      context: ../hr_erp_fe
+      dockerfile: Dockerfile
+    ports:
+      - "3001:80"  # Map container port 80 to host port 3001
+    environment:
+      - REACT_APP_API_URL=http://localhost:3000
+      - PORT=3001
+    depends_on:
+      - app
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=erp_hr_management
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=8103
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+volumes:
+  mongodb_data:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
